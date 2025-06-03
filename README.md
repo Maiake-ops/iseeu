@@ -30,6 +30,7 @@ Works on **Kali**, **Ubuntu**, **Fedora**, **Arch**, **macOS**, **Termux (Androi
 git clone https://github.com/Maiake-ops/iseeu.git
 cd iseeu
 chmod +x *.sh  # Make all scripts executable
+```
 
 3. Install Dependencies
 
@@ -47,10 +48,12 @@ Termux (Android):	pkg install -y busybox nmap
 
 🚀 Usage
 
+```bash
 sh Iseeu.sh          # Start the tracker (for Android only)
 bash Iseeu.sh       # Normal startup for (non-MLC only)
 ./kill-server.sh    # Stop tunnel and web server
 ./start.sh          # Menu launcher (recommended)
+```
 
 if you are on Android if you use bash Iseeu.sh it will freeze because it's a minimal Linux container (MLC)
 
