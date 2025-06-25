@@ -5,7 +5,7 @@ trap cleanup INT
 function cleanup() {
     echo "[*] Cleaning up..."
     pkill -f "python3 -m http.server"
-    pkill -f "cloudflared"
+    pkill -f "cloudflared tunnel"
     rm -f index.html
     echo "[*] Done. Exiting."
     exit 0
@@ -16,7 +16,7 @@ port=${port:-8080}
 
 echo "[*] Killing old servers..."
 pkill -f "python3 -m http.server" &>/dev/null
-pkill -f "cloudflared" &>/dev/null
+pkill -f "cloudflared tunnel" &>/dev/null
 
 echo "[*] Creating autoplay HTML..."
 cat <<EOF > index.html
@@ -45,22 +45,18 @@ done
 
 echo "[*] Starting Cloudflared tunnel..."
 
-logfile="logs/log_$(date +'%Y-%m-%d_%H-%M-%S').txt"
 mkdir -p logs
+logfile="logs/log_$(date +'%Y-%m-%d_%H-%M-%S').txt"
 
-nohup cloudflared tunnel \
-    --url "http://localhost:$port" \
-    --name iseeu-tunnel \
-    --logfile "$logfile" \
-    --metrics 127.0.0.1:20241 \
-    > /dev/null 2>&1 &
-
-echo "[*] Waiting for tunnel to initialize..."
-sleep 5
-
-echo "[✓] Tunnel should now be accessible at:"
-echo "    https://mysite.com"
-echo "[*] Logging to $logfile..."
-echo "[*] Press Ctrl+C to stop."
-
-while true; do sleep 1; done
+# Run cloudflared and extract the trycloudflare URL
+cloudflared tunnel --url "http://localhost:$port" 2>&1 | tee "$logfile" | while read -r line; do
+    echo "$line"
+    if [[ "$line" =~ https://[a-zA-Z0-9-]+\.trycloudflare\.com ]]; then
+        echo ""
+        echo "[✓] Tunnel is ready at:"
+        echo "    ${BASH_REMATCH[0]}"
+        echo ""
+        echo "[*] Logging to $logfile"
+        echo "[*] Press Ctrl+C to stop."
+    fi
+done
